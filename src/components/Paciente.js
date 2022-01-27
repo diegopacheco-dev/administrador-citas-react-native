@@ -1,36 +1,46 @@
 import React from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {formatearFecha} from '../helpers';
 
-const Paciente = ({item}) => {
-  const {paciente, fecha} = item;
-
-  const formatearFecha = fecha => {
-    const fechaFormateada = new Date(fecha);
-    const opciones = {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    };
-    return fechaFormateada.toLocaleDateString('es-ES', opciones);
-  };
+const Paciente = ({
+  item,
+  setModalVisible,
+  pacienteEditar,
+  pacienteEliminar,
+  setModalPaciente,
+  setPaciente,
+}) => {
+  const {paciente, fecha, id} = item;
 
   return (
-    <View style={styles.contenedor}>
-      <Text style={styles.label}>Paciente:</Text>
-      <Text style={styles.texto}>{paciente}</Text>
-      <Text style={styles.fecha}>{formatearFecha(fecha)}</Text>
+    <Pressable
+      onLongPress={() => {
+        setModalPaciente(true);
+        setPaciente(item);
+      }}>
+      <View style={styles.contenedor}>
+        <Text style={styles.label}>Paciente:</Text>
+        <Text style={styles.texto}>{paciente}</Text>
+        <Text style={styles.fecha}>{formatearFecha(fecha)}</Text>
 
-      <View style={styles.contenedorBotones}>
-        <Pressable style={[styles.btn, styles.btnEditar]}>
-          <Text style={styles.btnTexto}>Editar</Text>
-        </Pressable>
+        <View style={styles.contenedorBotones}>
+          <Pressable
+            onLongPress={() => {
+              setModalVisible(true);
+              pacienteEditar(id);
+            }}
+            style={[styles.btn, styles.btnEditar]}>
+            <Text style={styles.btnTexto}>Editar</Text>
+          </Pressable>
 
-        <Pressable style={[styles.btn, styles.btnEliminar]}>
-          <Text style={styles.btnTexto}>Eliminar</Text>
-        </Pressable>
+          <Pressable
+            onLongPress={() => pacienteEliminar(id)}
+            style={[styles.btn, styles.btnEliminar]}>
+            <Text style={styles.btnTexto}>Eliminar</Text>
+          </Pressable>
+        </View>
       </View>
-    </View>
+    </Pressable>
   );
 };
 
@@ -63,7 +73,21 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 20,
   },
-  btn: {},
-  btnEditar: {},
-  btnEliminar: {},
+  btn: {
+    paddingVertical: 5,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  btnEditar: {
+    backgroundColor: '#F59E0B',
+  },
+  btnEliminar: {
+    backgroundColor: '#EF4444',
+  },
+  btnTexto: {
+    textTransform: 'uppercase',
+    fontWeight: '700',
+    fontSize: 12,
+    color: '#fff',
+  },
 });

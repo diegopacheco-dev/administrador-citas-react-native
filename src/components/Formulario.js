@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Alert,
   Modal,
@@ -21,8 +21,16 @@ const initialValues = {
   fecha: new Date(),
 };
 
-const Formulario = ({isOpen, setModalVisible, setPacientes}) => {
+const Formulario = ({
+  isOpen,
+  cerrarModal,
+  setPacientes,
+  pacientes,
+  paciente: pacienteObj,
+  setPaciente: setPacienteApp,
+}) => {
   const [formValues, setFormValues] = useState(initialValues);
+  const [id, setId] = useState('');
 
   const handleCita = () => {
     // validar
@@ -39,22 +47,46 @@ const Formulario = ({isOpen, setModalVisible, setPacientes}) => {
       Alert.alert('Error', 'Todos los campos son obligatorios');
       return;
     }
-    setPacientes(prev => [...prev, {...formValues, id: Date.now()}]);
+
+    // Revisar si es una edición o una creación
+    if (id) {
+      // Es una edición
+      const pacientesActualizados = pacientes.map(pacienteState =>
+        pacienteState.id === id ? {...formValues} : pacienteState,
+      );
+      setPacientes(pacientesActualizados);
+      setPacienteApp({});
+    } else {
+      // Es una creación
+      setPacientes(prev => [...prev, {...formValues, id: Date.now()}]);
+    }
+
     setFormValues(initialValues);
-    setModalVisible(false);
+    cerrarModal();
   };
+
+  useEffect(() => {
+    if (Object.keys(pacienteObj).length > 0) {
+      setFormValues({...pacienteObj});
+      setId(pacienteObj.id);
+    }
+  }, [pacienteObj]);
 
   return (
     <Modal animationType="fade" visible={isOpen}>
       <SafeAreaView style={styles.contenido}>
         <ScrollView>
           <Text style={styles.titulo}>
-            Nueva {''}
+            {pacienteObj.id ? 'Editar' : 'Nueva'} {''}
             <Text>Cita</Text>
           </Text>
 
           <Pressable
-            onPress={() => setModalVisible(!isOpen)}
+            onLongPress={() => {
+              cerrarModal();
+              setPacienteApp({});
+              setFormValues(initialValues);
+            }}
             style={styles.btnCancelar}>
             <Text style={styles.btnCancelarTexto}>X Cancelar</Text>
           </Pressable>
@@ -138,7 +170,9 @@ const Formulario = ({isOpen, setModalVisible, setPacientes}) => {
           </View>
 
           <Pressable onPress={handleCita} style={styles.btnNuevaCita}>
-            <Text style={styles.btnNuevaCitaTexto}>Agregar Paciente</Text>
+            <Text style={styles.btnNuevaCitaTexto}>
+              {pacienteObj.id ? 'Editar' : 'Agregar'} Paciente
+            </Text>
           </Pressable>
         </ScrollView>
       </SafeAreaView>
